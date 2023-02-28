@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Datelike, Utc, Weekday};
 use core::slice;
 use rustygit::Repository;
 use std::env;
@@ -27,7 +27,7 @@ fn main() {
     let mut rng = oorandom::Rand32::new(seed);
 
     // TODO: make daily commit count a parameter
-    let daily_commit_count: Range<u32> = Range { start: 0, end: 3 };
+    let daily_commit_count: Range<u32> = Range { start: 0, end: 5 };
 
     // Create folder if needed
     match fs::create_dir_all(repo_path) {
@@ -89,6 +89,17 @@ fn main() {
                         + (commit_count - 1 - commit_index) as u64,
                 );
             let date_time: DateTime<Utc> = system_date.into();
+
+            // Skip most weekends
+            match date_time.weekday() {
+                Weekday::Sat | Weekday::Sun => {
+                    if rng.rand_float() < 0.9 {
+                        continue;
+                    }
+                }
+                _ => (),
+            }
+
             let date_string = date_time.to_rfc3339();
             env::set_var("GIT_AUTHOR_DATE", &date_string);
             env::set_var("GIT_COMMITTER_DATE", &date_string);
