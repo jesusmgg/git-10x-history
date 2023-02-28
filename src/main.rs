@@ -94,6 +94,8 @@ fn main() {
             env::set_var("GIT_COMMITTER_DATE", &date_string);
 
             repo.commit_all("Fake commit.").unwrap();
+
+            println!("Generated commit for {}.", &date_string);
         }
     }
 }
